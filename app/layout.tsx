@@ -4,7 +4,7 @@ import '@/styles/globals.css';
 import { AuthProvider } from '@/context/AuthContext';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import { AnimationProvider } from '@/context/AnimationContext';
-import Navigation from '@/components/navigation/Navigation';
+import ModernShell from '@/components/ModernShell';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -22,15 +22,11 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <AuthProvider>
-          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} forcedTheme="dark">
             <AnimationProvider>
-              {/* Mission Control Layout Grid */}
-              <div className="mission-control-layout">
-                <Navigation />
-                <main className="mission-control-main">
-                  {children}
-                </main>
-              </div>
+              <ModernShell>
+                {children}
+              </ModernShell>
             </AnimationProvider>
           </ThemeProvider>
         </AuthProvider>
