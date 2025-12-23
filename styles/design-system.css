@@ -1,0 +1,733 @@
+/* Technical Design System - Mission Control Interface */
+
+:root {
+  /* Layout System */
+  --sidebar-width: 4rem;
+  --sidebar-width-expanded: 18rem;
+  --navbar-height: 4rem;
+  
+  /* Spacing Scale */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --space-2xl: 3rem;
+  
+  /* Border Radius */
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 6px;
+  
+  /* Transitions */
+  --transition-fast: 120ms ease-out;
+  --transition-medium: 200ms ease-out;
+  --transition-slow: 300ms ease-out;
+}
+
+/* Dark Theme (Default) */
+:root,
+.dark {
+  /* Background Colors */
+  --bg-primary: #0C0E12;
+  --bg-secondary: #141821;
+  --bg-tertiary: #1C1F24;
+  
+  /* Text Colors */
+  --text-primary: #E6EAF0;
+  --text-secondary: #A8B2C1;
+  --text-tertiary: #6B7280;
+  --text-accent: #3FD6FF;
+  
+  /* Arc Reactor Colors */
+  --arc-primary: #3FD6FF;
+  --arc-secondary: #1FA2C9;
+  --arc-glow: rgba(63, 214, 255, 0.3);
+  
+  /* System Colors */
+  --color-success: #10B981;
+  --color-warning: #F59E0B;
+  --color-error: #EF4444;
+  --color-info: #3B82F6;
+  
+  /* Glass System */
+  --glass-bg: rgba(20, 25, 35, 0.55);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-blur: blur(18px);
+  
+  /* Shadows */
+  --shadow-panel: 0 4px 16px rgba(0, 0, 0, 0.4);
+  --shadow-elevated: 0 8px 32px rgba(0, 0, 0, 0.6);
+}
+
+/* Light Theme */
+.light {
+  /* Background Colors */
+  --bg-primary: #F4F6F8;
+  --bg-secondary: #FFFFFF;
+  --bg-tertiary: #F8FAFC;
+  
+  /* Text Colors */
+  --text-primary: #1C1F24;
+  --text-secondary: #4B5563;
+  --text-tertiary: #9CA3AF;
+  --text-accent: #0369A1;
+  
+  /* Arc Reactor Colors */
+  --arc-primary: #0369A1;
+  --arc-secondary: #0284C7;
+  --arc-glow: rgba(3, 105, 161, 0.2);
+  
+  /* System Colors */
+  --color-success: #059669;
+  --color-warning: #D97706;
+  --color-error: #DC2626;
+  --color-info: #2563EB;
+  
+  /* Glass System */
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(0, 0, 0, 0.08);
+  --glass-blur: blur(18px);
+  
+  /* Shadows */
+  --shadow-panel: 0 4px 16px rgba(0, 0, 0, 0.08);
+  --shadow-elevated: 0 8px 32px rgba(0, 0, 0, 0.12);
+}
+
+/* Mission Control Layout System */
+.mission-control-layout {
+  display: grid;
+  grid-template-areas: 
+    "sidebar navbar"
+    "sidebar main";
+  grid-template-columns: var(--sidebar-width) 1fr;
+  grid-template-rows: var(--navbar-height) 1fr;
+  height: 100vh;
+  overflow: hidden;
+  gap: 12px;
+  padding: 12px;
+}
+
+.mission-control-main {
+  grid-area: main;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: var(--bg-primary);
+  position: relative;
+  border-radius: 12px;
+}
+
+/* Glass Panel System */
+.glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  box-shadow: var(--shadow-panel);
+  position: relative;
+}
+
+.glass-panel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--text-accent), transparent);
+  opacity: 0.3;
+  border-radius: 12px 12px 0 0;
+}
+
+/* Iron Man HUD Corner Brackets */
+.hud-corners::after {
+  content: '';
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  width: 12px;
+  height: 12px;
+  border-top: 1px solid var(--text-accent);
+  border-left: 1px solid var(--text-accent);
+  opacity: 0.4;
+}
+
+.hud-corners::before {
+  content: '';
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 12px;
+  height: 12px;
+  border-top: 1px solid var(--text-accent);
+  border-right: 1px solid var(--text-accent);
+  opacity: 0.4;
+}
+
+/* System Typography */
+.system-label {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+
+.system-value {
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  font-size: 0.75rem;
+  color: var(--text-accent);
+  letter-spacing: 0.05em;
+  font-weight: 500;
+}
+
+.section-header {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  position: relative;
+}
+
+.section-header::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 20px;
+  height: 1px;
+  background: var(--text-accent);
+  opacity: 0.4;
+}
+
+/* Mission Control Indicators */
+.mission-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  background: var(--arc-glow);
+  border: 1px solid var(--text-accent);
+  border-radius: 3px;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-accent);
+}
+
+.mission-indicator::before {
+  content: '';
+  width: 3px;
+  height: 3px;
+  background: var(--text-accent);
+  border-radius: 50%;
+  animation: status-pulse 2s ease-in-out infinite;
+  box-shadow: 0 0 3px var(--arc-glow);
+}
+
+/* Theme-aware utilities */
+.text-primary {
+  color: var(--text-primary) !important;
+}
+
+.text-secondary {
+  color: var(--text-secondary) !important;
+}
+
+.text-tertiary {
+  color: var(--text-tertiary) !important;
+}
+
+.text-accent {
+  color: var(--text-accent) !important;
+}
+
+.bg-primary {
+  background-color: var(--bg-primary);
+}
+
+.bg-secondary {
+  background-color: var(--bg-secondary);
+}
+
+.bg-tertiary {
+  background-color: var(--bg-tertiary);
+}
+
+/* Technical Buttons */
+.tech-button {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: 4px;
+  color: var(--text-primary);
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.025em;
+  padding: 8px 12px;
+  transition: all var(--transition-fast);
+  position: relative;
+}
+
+.tech-button:hover {
+  border-color: var(--text-accent);
+  box-shadow: 0 0 0 1px var(--arc-glow);
+}
+
+.tech-hover {
+  position: relative;
+  transition: all var(--transition-fast);
+}
+
+.tech-hover:hover {
+  border-color: var(--text-accent);
+}
+
+/* Embedded Content Container */
+.embedded-frame {
+  position: relative;
+  width: 100%;
+  height: calc(100vh - var(--navbar-height) - 8rem);
+  min-height: 600px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-elevated);
+}
+
+.embedded-frame iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  border-radius: 12px;
+}
+
+.embedded-frame::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--text-accent), transparent);
+  opacity: 0.6;
+  z-index: 1;
+}
+
+/* Technical Animations */
+@keyframes status-pulse {
+  0%, 100% { 
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% { 
+    opacity: 0.6;
+    transform: scale(1.1);
+  }
+}
+
+/* System State Transitions */
+.system-transition {
+  transition: all 200ms ease-out;
+}
+
+.mechanical-timing {
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hud-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 150ms ease-out;
+}
+
+.hud-overlay.active {
+  opacity: 1;
+}
+
+@keyframes system-boot {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.1);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.system-boot {
+  animation: system-boot 600ms ease-out;
+}
+
+/* Arc Reactor Animations */
+@keyframes arc-rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.arc-outer-ring {
+  animation: arc-rotate 25s linear infinite;
+  transform-origin: 50px 50px;
+}
+
+.arc-outer-ring.active {
+  animation: arc-rotate 2s linear infinite;
+}
+
+/* System Initializer Overlay */
+.system-initializer-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: system-overlay-in 200ms ease-out;
+}
+
+.system-initializer-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
+.arc-reactor-container {
+  position: relative;
+  width: 80px;
+  height: 80px;
+}
+
+.arc-segments {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.arc-segments.splitting path {
+  animation: arc-segment-split 200ms ease-out;
+}
+
+.system-text {
+  text-align: center;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.system-operation {
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: var(--text-accent);
+  margin-bottom: 4px;
+}
+
+.system-status {
+  font-size: 0.75rem;
+  font-weight: 400;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+  opacity: 0.8;
+}
+
+@keyframes system-overlay-in {
+  from {
+    opacity: 0;
+    backdrop-filter: blur(0px);
+  }
+  to {
+    opacity: 1;
+    backdrop-filter: blur(8px);
+  }
+}
+
+@keyframes arc-segment-split {
+  0% {
+    transform: scale(1) translateY(0);
+    opacity: 0.9;
+  }
+  50% {
+    transform: scale(1.15) translateY(-2px);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(1) translateY(0);
+    opacity: 0.9;
+  }
+}
+
+/* Page Intro Animations */
+@keyframes companion-arm-slide {
+  0% {
+    transform: translateX(-100px);
+    opacity: 0;
+  }
+  60% {
+    transform: translateX(0);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 0;
+  }
+}
+
+@keyframes checklist-draw {
+  0% {
+    stroke-dashoffset: 100;
+    opacity: 0;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+}
+
+@keyframes code-assemble {
+  0% {
+    transform: translateY(20px) scale(0.8);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes helmet-blink {
+  0%, 90%, 100% {
+    opacity: 0.3;
+  }
+  45% {
+    opacity: 0.8;
+  }
+}
+
+@keyframes plane-flight {
+  0% {
+    transform: translateX(-50px) translateY(10px);
+    opacity: 0;
+  }
+  30% {
+    transform: translateX(0) translateY(0);
+    opacity: 0.6;
+  }
+  70% {
+    transform: translateX(0) translateY(0);
+    opacity: 0.6;
+  }
+  100% {
+    transform: translateX(50px) translateY(-10px);
+    opacity: 0;
+  }
+}
+
+@keyframes network-connect {
+  0% {
+    stroke-dashoffset: 50;
+    opacity: 0;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 0.7;
+  }
+}
+
+/* Page Intro Classes */
+.page-intro {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 100;
+}
+
+.companion-intro {
+  animation: companion-arm-slide 1000ms ease-out;
+}
+
+.todo-intro .checklist-line {
+  stroke-dasharray: 100;
+  animation: checklist-draw 300ms ease-out;
+}
+
+.coding-intro .code-block {
+  animation: code-assemble 400ms ease-out;
+}
+
+.games-intro .helmet-eye {
+  animation: helmet-blink 800ms ease-out;
+}
+
+.travel-intro .plane-path {
+  animation: plane-flight 1200ms ease-out;
+}
+
+.community-intro .network-line {
+  stroke-dasharray: 50;
+  animation: network-connect 500ms ease-out;
+}
+
+/* Sidebar and Navbar Positioning */
+.sidebar-container {
+  grid-area: sidebar;
+  position: fixed;
+  left: 12px;
+  top: 12px;
+  height: calc(100vh - 24px);
+  z-index: 50;
+}
+
+.navbar-container {
+  grid-area: navbar;
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  height: var(--navbar-height);
+  z-index: 40;
+  transition: left 300ms ease-out;
+}
+
+.navbar-collapsed {
+  left: calc(var(--sidebar-width) + 24px);
+}
+
+.navbar-expanded {
+  left: calc(var(--sidebar-width-expanded) + 24px);
+}
+
+/* Enhanced Sidebar Hover System */
+.sidebar-container:not(.w-72):hover {
+  width: 18rem !important;
+  transition: width 200ms ease-out;
+}
+
+.sidebar-container:not(.w-72):hover .nav-group-letter {
+  text-align: left;
+  padding-left: 0;
+}
+
+.sidebar-container:not(.w-72):hover .nav-letter {
+  display: none;
+}
+
+.sidebar-container:not(.w-72):hover .nav-full-label {
+  display: inline;
+  opacity: 1 !important;
+  animation: text-fade-in 150ms ease-out both;
+}
+
+.sidebar-container:not(.w-72):hover .nav-group-items {
+  max-height: 384px !important;
+  opacity: 1 !important;
+}
+
+.nav-full-label {
+  display: none;
+}
+
+@keyframes text-fade-in {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Navbar Animation Trigger */
+.navbar-item-active {
+  position: relative;
+}
+
+.navbar-item-active::before {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 2px;
+  background: var(--text-accent);
+  animation: navbar-underline 200ms ease-out forwards;
+}
+
+@keyframes navbar-underline {
+  to {
+    width: 80%;
+  }
+}
+
+/* Companion Arm Animation */
+.companion-arm {
+  animation: companion-arm-slide 1000ms ease-out;
+}
+
+/* Responsive Layout Adjustments */
+@media (max-width: 1024px) {
+  .mission-control-layout {
+    grid-template-columns: var(--sidebar-width) 1fr;
+  }
+  
+  .embedded-frame {
+    height: calc(100vh - var(--navbar-height) - 6rem);
+    min-height: 500px;
+  }
+}
+
+@media (max-width: 768px) {
+  .mission-control-layout {
+    grid-template-areas: 
+      "navbar navbar"
+      "main main";
+    grid-template-columns: 1fr;
+    grid-template-rows: var(--navbar-height) 1fr;
+    gap: 8px;
+    padding: 8px;
+  }
+  
+  .sidebar-container {
+    display: none;
+  }
+  
+  .navbar-container {
+    left: 12px;
+  }
+  
+  .embedded-frame {
+    height: calc(100vh - var(--navbar-height) - 4rem);
+    min-height: 400px;
+  }
+}
