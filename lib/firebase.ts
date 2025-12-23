@@ -3,7 +3,7 @@
 
 import { initializeApp, getApps } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore';
+import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
 const firebaseConfig = {
@@ -20,17 +20,17 @@ if (!firebaseConfig.apiKey) {
   console.warn('Firebase configuration is incomplete. Please set environment variables.');
 }
 
-// Initialize Firebase app
-const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+// Initialize Firebase - only on client side
+let app;
+let auth;
+let db;
+let storage;
 
-// Initialize services
-const auth = getAuth(app);
-const db = getFirestore(app);
-const storage = getStorage(app);
-
-// Enable offline persistence for Firestore (client-side only)
 if (typeof window !== 'undefined') {
-  db.settings = { ...db.settings, experimentalForceLongPolling: true };
+  app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+  auth = getAuth(app);
+  db = getFirestore(app);
+  storage = getStorage(app);
 }
 
-export { auth, db, storage, app };
+export { app, auth, db, storage };
