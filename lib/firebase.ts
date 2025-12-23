@@ -3,7 +3,7 @@
 
 import { initializeApp, getApps } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
 const firebaseConfig = {
@@ -15,20 +15,22 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-// Initialize variables with explicit types, initially undefined
-let app: import('firebase/app').FirebaseApp;
-let auth: import('firebase/auth').Auth;
-let db: import('firebase/firestore').Firestore;
-let storage: import('firebase/storage').FirebaseStorage;
-
-if (typeof window !== 'undefined') {
-  app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
-  auth = getAuth(app);
-  db = getFirestore(app);
-  storage = getStorage(app);
+// Validate Firebase config
+if (!firebaseConfig.apiKey) {
+  console.warn('Firebase configuration is incomplete. Please set environment variables.');
 }
 
-// Exporting as potentially undefined if consumed on server side without checks, 
-// strictly speaking, but in this project it's used in client components mostly.
-// To be safe for TS, we can cast them if we are sure they are initialized in the client context
-export { auth, db, storage };
+// Initialize Firebase app
+const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+
+// Initialize services
+const auth = getAuth(app);
+const db = getFirestore(app);
+const storage = getStorage(app);
+
+// Enable offline persistence for Firestore (client-side only)
+if (typeof window !== 'undefined') {
+  db.settings = { ...db.settings, experimentalForceLongPolling: true };
+}
+
+export { auth, db, storage, app };

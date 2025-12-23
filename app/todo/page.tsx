@@ -24,6 +24,7 @@ export default function TodoPage() {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [editingTodo, setEditingTodo] = useState<Todo | null>(null);
+  const [error, setError] = useState('');
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -43,9 +44,15 @@ export default function TodoPage() {
 
   const fetchTodos = async () => {
     try {
+      setError('');
+      if (!user?.uid) {
+        setError('User not authenticated');
+        return;
+      }
+      
       const todosQuery = query(
         collection(db, 'todos'),
-        where('uid', '==', user!.uid),
+        where('uid', '==', user.uid),
         orderBy('dueDate', 'asc')
       );
       const snapshot = await getDocs(todosQuery);
@@ -54,52 +61,72 @@ export default function TodoPage() {
         ...doc.data()
       })) as Todo[];
       setTodos(todosData);
-    } catch (error) {
+    } catch (error: any) {
+      const errorMsg = error.message || 'Error fetching todos';
       console.error('Error fetching todos:', error);
+      setError(errorMsg);
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
+    
+    if (!formData.title.trim()) {
+      setError('Task title is required');
+      return;
+    }
+    
     try {
       if (editingTodo) {
         await updateDoc(doc(db, 'todos', editingTodo.id), {
           ...formData,
-          uid: user!.uid
+          uid: user!.uid,
+          updatedAt: new Date().toISOString()
         });
       } else {
         await addDoc(collection(db, 'todos'), {
           ...formData,
           completed: false,
-          uid: user!.uid
+          uid: user!.uid,
+          createdAt: new Date().toISOString()
         });
       }
       setFormData({ title: '', description: '', dueDate: '', priority: 'medium' });
       setShowForm(false);
       setEditingTodo(null);
       fetchTodos();
-    } catch (error) {
+    } catch (error: any) {
+      const errorMsg = error.message || 'Error saving todo';
       console.error('Error saving todo:', error);
+      setError(errorMsg);
     }
   };
 
   const toggleComplete = async (todo: Todo) => {
     try {
+      setError('');
       await updateDoc(doc(db, 'todos', todo.id), {
-        completed: !todo.completed
+        completed: !todo.completed,
+        updatedAt: new Date().toISOString()
       });
       fetchTodos();
-    } catch (error) {
+    } catch (error: any) {
+      const errorMsg = error.message || 'Error updating todo';
       console.error('Error updating todo:', error);
+      setError(errorMsg);
     }
   };
 
   const deleteTodo = async (id: string) => {
     try {
+      setError('');
       await deleteDoc(doc(db, 'todos', id));
       fetchTodos();
-    } catch (error) {
+    } catch (error: any) {
+      const errorMsg = error.message || 'Error deleting todo';
       console.error('Error deleting todo:', error);
+      setError(errorMsg);
     }
   };
 
@@ -146,6 +173,20 @@ export default function TodoPage() {
           Add New Task
         </PrimaryButton>
       </div>
+
+      {error && (
+        <GlassCard className="mb-8 border-red-500/50">
+          <div className="flex justify-between items-center">
+            <p className="text-red-400">{error}</p>
+            <button
+              onClick={() => setError('')}
+              className="text-red-400 hover:text-red-300 text-xl"
+            >
+              ✕
+            </button>
+          </div>
+        </GlassCard>
+      )}
 
       {showForm && (
         <GlassCard className="mb-8">
