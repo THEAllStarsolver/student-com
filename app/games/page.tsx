@@ -63,23 +63,29 @@ export default function GamesPage() {
       </div>
 
       {selectedGame ? (
-        <GlassCard className="h-[80vh]">
+        <GlassCard className="h-[85vh] p-4">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-2xl font-bold text-white">{selectedGame.title}</h2>
             <button
               onClick={() => setSelectedGame(null)}
-              className="px-4 py-2 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 transition-all"
+              className="px-6 py-2 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 transition-all font-semibold"
             >
-              Close Game
+              ✕ Close Game
             </button>
           </div>
-          <iframe
-            src={selectedGame.gameUrl}
-            className="w-full h-full rounded-xl border border-white/10"
-            frameBorder="0"
-            allowFullScreen
-            sandbox="allow-scripts allow-same-origin allow-forms"
-          />
+          <div className="w-full h-full rounded-xl overflow-hidden border border-white/10">
+            <iframe
+              src={selectedGame.gameUrl}
+              className="w-full h-full"
+              frameBorder="0"
+              allowFullScreen
+              sandbox="allow-scripts allow-same-origin allow-forms"
+              style={{ 
+                minHeight: 'calc(85vh - 120px)',
+                background: 'linear-gradient(135deg, #050508 0%, #1a1a2e 100%)'
+              }}
+            />
+          </div>
         </GlassCard>
       ) : (
         <>

@@ -1,6 +1,4 @@
 // Firebase Configuration and Initialization
-// TODO: Replace with your Firebase project credentials from Firebase Console
-
 import { initializeApp, getApps } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
@@ -12,20 +10,12 @@ const firebaseConfig = {
   storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
   messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
 };
 
-// Initialize variables with explicit types, initially undefined
-let app: import('firebase/app').FirebaseApp;
-let auth: import('firebase/auth').Auth;
-let db: import('firebase/firestore').Firestore;
+// Initialize Firebase
+const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+const auth = getAuth(app);
+const db = getFirestore(app);
 
-if (typeof window !== 'undefined') {
-  app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
-  auth = getAuth(app);
-  db = getFirestore(app);
-}
-
-// Exporting as potentially undefined if consumed on server side without checks, 
-// strictly speaking, but in this project it's used in client components mostly.
-// To be safe for TS, we can cast them if we are sure they are initialized in the client context
 export { auth, db };

@@ -1,13 +1,17 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+import { JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 import { AuthProvider } from './AuthContext';
 
-const inter = Inter({ subsets: ['latin'] });
+const jetbrainsMono = JetBrains_Mono({ 
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600', '700'],
+  variable: '--font-jetbrains-mono'
+});
 
 export const metadata: Metadata = {
-  title: 'STARK Companion - Student AI Assistant',
-  description: 'Ultra-modern AI-powered student companion with Stark Industries HUD interface',
+  title: 'STARK_OS - Nightshade Protocol',
+  description: 'Advanced AI-powered student companion with Iron Man HUD interface running Nightshade Protocol',
 };
 
 export default function RootLayout({
@@ -17,7 +21,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body className={`${jetbrainsMono.variable} font-hud`}>
         <AuthProvider>
           {children}
         </AuthProvider>

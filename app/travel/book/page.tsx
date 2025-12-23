@@ -3,14 +3,18 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import GlassCard from '@/components/ui/GlassCard';
+import PaymentGateway from '@/components/PaymentGateway';
+import BookingConfirmation from '@/components/BookingConfirmation';
 import { Plane, Calendar, Clock, CreditCard, CheckCircle, XCircle, ArrowLeft, QrCode } from 'lucide-react';
 
 function BookingContent() {
     const searchParams = useSearchParams();
     const router = useRouter();
 
-    const [step, setStep] = useState<'form' | 'processing' | 'success'>('form');
-    const [timer, setTimer] = useState(15);
+    const [step, setStep] = useState<'form' | 'payment' | 'confirmation'>('form');
+    const [showPaymentGateway, setShowPaymentGateway] = useState(false);
+    const [showConfirmation, setShowConfirmation] = useState(false);
+    const [paymentResult, setPaymentResult] = useState<any>(null);
 
     // Flight Details from URL
     const airline = searchParams.get('airline') || 'Airline';
@@ -28,41 +32,56 @@ function BookingContent() {
         name: '',
         age: '',
         phone: '',
+        email: '',
         food: 'none',
-        paymentMethod: 'card',
-        upiId: '',
-        cardNumber: '',
-        cardExpiry: '',
-        cardCvv: '',
     });
-
-    useEffect(() => {
-        let interval: NodeJS.Timeout;
-        if (step === 'processing') {
-            interval = setInterval(() => {
-                setTimer((prev) => {
-                    if (prev <= 1) {
-                        setStep('success');
-                        clearInterval(interval);
-                        return 0;
-                    }
-                    return prev - 1;
-                });
-            }, 1000);
-        }
-        return () => clearInterval(interval);
-    }, [step]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        setStep('processing');
+        if (!formData.name || !formData.age || !formData.phone || !formData.email) {
+            alert('Please fill in all required fields');
+            return;
+        }
+        setShowPaymentGateway(true);
+    };
+
+    const handlePaymentComplete = (result: any) => {
+        setPaymentResult({
+            ...result,
+            customerInfo: {
+                name: formData.name,
+                email: formData.email,
+                phone: formData.phone
+            },
+            details: {
+                airline,
+                flightNumber,
+                from,
+                to,
+                departure,
+                arrival,
+                duration,
+                food: formData.food
+            }
+        });
+        setShowPaymentGateway(false);
+        setShowConfirmation(true);
     };
 
     const handleClose = () => {
-        window.close(); // Try closing the tab
-        // Fallback if window.close() is blocked (e.g. if not opened by script)
-        // We can also redirect to home, but user asked for "close"
+        window.close();
         router.push('/travel');
+    };
+
+    const bookingDetails = {
+        id: flightNumber,
+        title: `${airline} Flight ${flightNumber}`,
+        description: `${from} to ${to} • ${departure} - ${arrival}`,
+        amount: parseFloat(price),
+        currency: 'INR',
+        type: 'flight' as const,
+        dates: `Departure: ${departure}`,
+        passengers: 1
     };
 
     if (step === 'processing') {
@@ -307,6 +326,17 @@ function BookingContent() {
                                                 onChange={e => setFormData({ ...formData, phone: e.target.value })}
                                             />
                                         </div>
+                                        <div>
+                                            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Email Address</label>
+                                            <input
+                                                required
+                                                type="email"
+                                                className="w-full bg-slate-800/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
+                                                placeholder="john@example.com"
+                                                value={formData.email}
+                                                onChange={e => setFormData({ ...formData, email: e.target.value })}
+                                            />
+                                        </div>
                                         <div className="md:col-span-2">
                                             <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Meal Preference</label>
                                             <div className="grid grid-cols-3 gap-3">
@@ -335,104 +365,43 @@ function BookingContent() {
 
                                 <div className="h-px bg-white/10"></div>
 
-                                {/* Payment Section */}
-                                <section>
-                                    <h3 className="text-xl font-semibold text-white mb-4">Payment Method</h3>
-
-                                    <div className="flex gap-4 mb-6">
-                                        <button
-                                            type="button"
-                                            onClick={() => setFormData({ ...formData, paymentMethod: 'card' })}
-                                            className={`flex-1 py-3 rounded-xl font-semibold transition-all border ${formData.paymentMethod === 'card'
-                                                    ? 'bg-blue-500/20 border-blue-500 text-white'
-                                                    : 'bg-slate-800/50 border-white/10 text-slate-400 hover:bg-slate-700/50'
-                                                }`}
-                                        >
-                                            Credit/Debit Card
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={() => setFormData({ ...formData, paymentMethod: 'upi' })}
-                                            className={`flex-1 py-3 rounded-xl font-semibold transition-all border ${formData.paymentMethod === 'upi'
-                                                    ? 'bg-blue-500/20 border-blue-500 text-white'
-                                                    : 'bg-slate-800/50 border-white/10 text-slate-400 hover:bg-slate-700/50'
-                                                }`}
-                                        >
-                                            UPI
-                                        </button>
-                                    </div>
-
-                                    <div className="bg-slate-800/30 p-6 rounded-2xl border border-white/5">
-                                        {formData.paymentMethod === 'card' ? (
-                                            <div className="space-y-4">
-                                                <div>
-                                                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Card Number</label>
-                                                    <div className="relative">
-                                                        <CreditCard className="absolute left-4 top-3.5 w-5 h-5 text-slate-500" />
-                                                        <input
-                                                            required
-                                                            type="text"
-                                                            placeholder="0000 0000 0000 0000"
-                                                            className="w-full bg-slate-900/50 border border-white/10 rounded-xl pl-12 pr-4 py-3 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all font-mono"
-                                                            value={formData.cardNumber}
-                                                            onChange={e => setFormData({ ...formData, cardNumber: e.target.value })}
-                                                        />
-                                                    </div>
-                                                </div>
-                                                <div className="grid grid-cols-2 gap-4">
-                                                    <div>
-                                                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Expiry</label>
-                                                        <input
-                                                            required
-                                                            type="text"
-                                                            placeholder="MM/YY"
-                                                            className="w-full bg-slate-900/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all font-mono"
-                                                            value={formData.cardExpiry}
-                                                            onChange={e => setFormData({ ...formData, cardExpiry: e.target.value })}
-                                                        />
-                                                    </div>
-                                                    <div>
-                                                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">CVV</label>
-                                                        <input
-                                                            required
-                                                            type="text"
-                                                            placeholder="123"
-                                                            maxLength={3}
-                                                            className="w-full bg-slate-900/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all font-mono"
-                                                            value={formData.cardCvv}
-                                                            onChange={e => setFormData({ ...formData, cardCvv: e.target.value })}
-                                                        />
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        ) : (
-                                            <div>
-                                                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">UPI ID</label>
-                                                <input
-                                                    required
-                                                    type="text"
-                                                    placeholder="username@bank"
-                                                    className="w-full bg-slate-900/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
-                                                    value={formData.upiId}
-                                                    onChange={e => setFormData({ ...formData, upiId: e.target.value })}
-                                                />
-                                                <p className="text-xs text-slate-500 mt-2">Verify your UPI ID before proceeding</p>
-                                            </div>
-                                        )}
-                                    </div>
-                                </section>
-
                                 <button
                                     type="submit"
                                     className="w-full py-4 text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl shadow-lg shadow-blue-500/25 transition-all transform hover:scale-[1.02] active:scale-[0.98]"
                                 >
-                                    Pay ₹{price}
+                                    Proceed to Payment
                                 </button>
                             </form>
                         </div>
                     </div>
                 </GlassCard>
             </div>
+
+            {/* Payment Gateway Modal */}
+            {showPaymentGateway && (
+                <PaymentGateway
+                    bookingDetails={bookingDetails}
+                    onPaymentComplete={handlePaymentComplete}
+                    onCancel={() => setShowPaymentGateway(false)}
+                />
+            )}
+
+            {/* Booking Confirmation Modal */}
+            {showConfirmation && paymentResult && (
+                <BookingConfirmation
+                    bookingData={{
+                        type: 'flight',
+                        bookingReference: paymentResult.bookingReference,
+                        transactionId: paymentResult.transactionId,
+                        amount: paymentResult.amount,
+                        currency: paymentResult.currency,
+                        customerInfo: paymentResult.customerInfo,
+                        details: paymentResult.details,
+                        timestamp: paymentResult.timestamp
+                    }}
+                    onClose={handleClose}
+                />
+            )}
         </div>
     );
 }

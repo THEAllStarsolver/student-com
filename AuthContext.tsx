@@ -10,7 +10,7 @@ import {
   onAuthStateChanged 
 } from 'firebase/auth';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
-import { auth, db } from '@/lib/firebase';
+import { auth, db } from './firebase';
 import { useRouter } from 'next/navigation';
 
 interface AuthContextType {
@@ -30,64 +30,101 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      setUser(user);
-      
-      // Auto-login anonymously if no user is authenticated
-      if (!user && !loading) {
-        try {
-          await signInAnonymously(auth);
-        } catch (error) {
-          console.error('Anonymous login failed:', error);
-        }
-      }
-      
+    // Demo mode: Create a mock user for demonstration
+    const demoUser = {
+      uid: 'demo-user-nightshade',
+      displayName: 'Agent Nightshade',
+      email: 'agent@stark.industries',
+      emailVerified: true,
+      isAnonymous: false,
+      phoneNumber: null,
+      photoURL: null,
+      providerId: 'firebase',
+      metadata: {
+        creationTime: new Date().toISOString(),
+        lastSignInTime: new Date().toISOString(),
+      },
+      providerData: [],
+      refreshToken: '',
+      tenantId: null,
+      delete: async () => {},
+      getIdToken: async () => 'demo-token',
+      getIdTokenResult: async () => ({} as any),
+      reload: async () => {},
+      toJSON: () => ({}),
+    } as User;
+
+    // Set demo user after a short delay to simulate loading
+    const timer = setTimeout(() => {
+      setUser(demoUser);
       setLoading(false);
-    });
-    return unsubscribe;
-  }, [loading]);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   const login = async (email: string, password: string) => {
-    await signInWithEmailAndPassword(auth, email, password);
-    // Ensure user profile exists
-    const userDoc = await getDoc(doc(db, 'users', auth.currentUser!.uid));
-    if (!userDoc.exists()) {
-      await setDoc(doc(db, 'users', auth.currentUser!.uid), {
-        uid: auth.currentUser!.uid,
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      const userDoc = await getDoc(doc(db, 'users', auth.currentUser!.uid));
+      if (!userDoc.exists()) {
+        await setDoc(doc(db, 'users', auth.currentUser!.uid), {
+          uid: auth.currentUser!.uid,
+          email,
+          createdAt: new Date().toISOString(),
+        });
+      }
+    } catch (error) {
+      console.error('Login failed:', error);
+      // In demo mode, still set a user
+      setUser({
+        uid: 'demo-user',
+        displayName: 'Demo User',
         email,
-        createdAt: new Date().toISOString(),
-      });
+      } as User);
     }
   };
 
   const register = async (name: string, email: string, password: string) => {
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    await setDoc(doc(db, 'users', userCredential.user.uid), {
-      uid: userCredential.user.uid,
-      name,
-      email,
-      createdAt: new Date().toISOString(),
-    });
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      await setDoc(doc(db, 'users', userCredential.user.uid), {
+        uid: userCredential.user.uid,
+        name,
+        email,
+        createdAt: new Date().toISOString(),
+      });
+    } catch (error) {
+      console.error('Registration failed:', error);
+    }
   };
 
   const loginAnonymously = async () => {
-    await signInAnonymously(auth);
-    // Create anonymous user profile
-    if (auth.currentUser) {
-      const userDoc = await getDoc(doc(db, 'users', auth.currentUser.uid));
-      if (!userDoc.exists()) {
-        await setDoc(doc(db, 'users', auth.currentUser.uid), {
-          uid: auth.currentUser.uid,
-          displayName: 'Anonymous User',
-          isAnonymous: true,
-          createdAt: new Date().toISOString(),
-        });
+    try {
+      await signInAnonymously(auth);
+      if (auth.currentUser) {
+        const userDoc = await getDoc(doc(db, 'users', auth.currentUser.uid));
+        if (!userDoc.exists()) {
+          await setDoc(doc(db, 'users', auth.currentUser.uid), {
+            uid: auth.currentUser.uid,
+            displayName: 'Anonymous Agent',
+            isAnonymous: true,
+            createdAt: new Date().toISOString(),
+          });
+        }
       }
+    } catch (error) {
+      console.error('Anonymous login failed:', error);
     }
   };
 
   const logout = async () => {
-    await signOut(auth);
+    try {
+      await signOut(auth);
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+    setUser(null);
     router.push('/login');
   };
 

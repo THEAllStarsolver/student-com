@@ -2,12 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useAuth } from '@/context/AuthContext';
-import StarkLayout from '@/components/StarkLayout';
-import Dashboard from '@/components/Dashboard';
-import Academics from '@/components/Academics';
-import PlaceholderModule from '@/components/PlaceholderModule';
-import ArcReactorLoader from '@/components/ArcReactorLoader';
+import { useAuth } from './AuthContext';
+import StarkLayout from './components/NightshadeLayout';
+import Dashboard from './components/Dashboard';
+import Academics from './components/Academics';
+import TravelModule from './components/TravelModule';
+import PlaceholderModule from './components/PlaceholderModule';
+import StarkArcReactor from './components/NightshadeArcReactor';
 import { 
   CheckSquare, 
   Code, 
@@ -26,36 +27,42 @@ export default function Home() {
     // Simulate system initialization
     const timer = setTimeout(() => {
       setIsInitializing(false);
-    }, 2500);
+    }, 3500);
 
     return () => clearTimeout(timer);
   }, []);
 
-  // Show Arc Reactor loader during initialization
+  // Show Stark Arc Reactor loader during initialization
   if (isInitializing || authLoading) {
     return (
-      <div className="min-h-screen bg-stark-bg flex flex-col items-center justify-center">
+      <div className="min-h-screen bg-black flex flex-col items-center justify-center">
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
           className="text-center"
         >
-          <ArcReactorLoader loading={true} size={150} />
+          <StarkArcReactor 
+            loading={true} 
+            size={220}
+            onComplete={() => setIsInitializing(false)}
+          />
           
           <motion.div
-            className="mt-8 space-y-4"
+            className="mt-12 space-y-6"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5, duration: 0.6 }}
           >
-            <h1 className="text-3xl font-bold gradient-stark">STARK COMPANION</h1>
-            <p className="text-stark-cyan font-mono text-sm tracking-widest uppercase">
-              Initializing AI Systems...
+            <h1 className="text-4xl font-bold text-indigo-400 hud-font">
+              STARK INDUSTRIES OS
+            </h1>
+            <p className="text-indigo-400 hud-font text-sm tracking-widest uppercase">
+              Nightshade Protocol Initializing...
             </p>
             
             <motion.div
-              className="flex items-center justify-center space-x-4 text-xs text-gray-400 font-mono"
+              className="flex items-center justify-center space-x-6 text-xs text-gray-400 hud-font"
               animate={{ opacity: [0.5, 1, 0.5] }}
               transition={{ duration: 2, repeat: Infinity }}
             >
@@ -64,6 +71,14 @@ export default function Home() {
               <span>SECURITY: ACTIVE</span>
               <span>|</span>
               <span>POWER: 100%</span>
+            </motion.div>
+            
+            <motion.div
+              className="text-xs text-indigo-400 hud-font"
+              animate={{ opacity: [0.3, 0.8, 0.3] }}
+              transition={{ duration: 1.5, repeat: Infinity }}
+            >
+              Arc Reactor: Stable • Repulsors: Charged • HUD: Active
             </motion.div>
           </motion.div>
         </motion.div>
@@ -74,17 +89,25 @@ export default function Home() {
   // Redirect to login if not authenticated
   if (!user) {
     return (
-      <div className="min-h-screen bg-stark-bg flex items-center justify-center">
+      <div className="min-h-screen bg-black flex items-center justify-center">
         <motion.div
-          className="glass-card p-8 text-center max-w-md"
+          className="stark-glass p-8 text-center max-w-md"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          <h2 className="text-2xl font-bold gradient-stark mb-4">Access Required</h2>
-          <p className="text-gray-300 mb-6">Please authenticate to access the Stark Companion system.</p>
-          <button className="px-6 py-3 bg-gradient-to-r from-stark-cyan to-cyan-600 text-white rounded-lg font-medium stark-hover">
+          <h2 className="text-2xl font-bold text-indigo-400 mb-4 hud-font">
+            ACCESS REQUIRED
+          </h2>
+          <p className="text-gray-300 mb-6 hud-font text-sm">
+            Please authenticate to access the Stark Industries OS.
+          </p>
+          <motion.button 
+            className="px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-lg font-medium hud-font transition-all hover:shadow-lg hover:shadow-indigo-500/25"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
             Initialize Login Sequence
-          </button>
+          </motion.button>
         </motion.div>
       </div>
     );
@@ -95,13 +118,16 @@ export default function Home() {
       case 'dashboard':
         return <Dashboard user={user} />;
       
+      case 'travel':
+        return <TravelModule />;
+      
       case 'academics':
         return <Academics />;
       
       case 'todo':
         return (
           <PlaceholderModule
-            title="Task Management"
+            title="Task Matrix"
             description="Advanced AI-powered task management and productivity optimization system"
             icon={CheckSquare}
             features={[
@@ -118,7 +144,7 @@ export default function Home() {
       case 'devhub':
         return (
           <PlaceholderModule
-            title="Development Hub"
+            title="Development Protocol"
             description="Comprehensive development environment with AI-assisted coding and project management"
             icon={Code}
             features={[
@@ -135,7 +161,7 @@ export default function Home() {
       case 'design':
         return (
           <PlaceholderModule
-            title="Design Studio"
+            title="Design Laboratory"
             description="Creative design workspace with AI-powered tools and collaborative features"
             icon={Palette}
             features={[
@@ -152,7 +178,7 @@ export default function Home() {
       case 'finance':
         return (
           <PlaceholderModule
-            title="Financial Management"
+            title="Resource Management"
             description="Smart financial tracking and budgeting system for students"
             icon={DollarSign}
             features={[
@@ -186,7 +212,7 @@ export default function Home() {
       case 'simulation':
         return (
           <PlaceholderModule
-            title="Simulation Lab"
+            title="Simulation Core"
             description="Advanced simulation environment for learning and experimentation"
             icon={Zap}
             features={[

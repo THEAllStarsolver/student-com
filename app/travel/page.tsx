@@ -6,6 +6,7 @@ import { useAuth } from '@/context/AuthContext';
 import { searchFlights } from '@/lib/flights';
 import GlassCard from '@/components/ui/GlassCard';
 import PrimaryButton from '@/components/ui/PrimaryButton';
+import HotelBooking from '@/components/HotelBooking';
 import { Plane, MapPin, Star, Clock, Calendar } from 'lucide-react';
 
 const airlineLogos: any = {
@@ -35,6 +36,8 @@ export default function TravelPage() {
   const [hotels, setHotels] = useState<any[]>([]); // Using any for simplicity in this iteration
   const [isSearching, setIsSearching] = useState(false);
   const [isLoadingHotels, setIsLoadingHotels] = useState(false);
+  const [selectedHotel, setSelectedHotel] = useState<any>(null);
+  const [showHotelBooking, setShowHotelBooking] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) router.push('/login');
@@ -118,8 +121,15 @@ export default function TravelPage() {
     window.open(`/travel/book?${params.toString()}`, '_blank');
   };
 
-  const handleHotelBooking = () => {
-    window.open('https://www.makemytrip.com/hotels/', '_blank');
+  const handleHotelBooking = (hotel: any) => {
+    // Add required fields for booking
+    const hotelWithBookingData = {
+      ...hotel,
+      amenities: hotel.amenities || ['WiFi', 'Parking', 'Restaurant', 'Gym'],
+      description: hotel.description || 'Luxury accommodation with modern amenities and excellent service.'
+    };
+    setSelectedHotel(hotelWithBookingData);
+    setShowHotelBooking(true);
   };
 
   if (loading) return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
@@ -339,10 +349,10 @@ export default function TravelPage() {
                         </div>
                       </div>
                       <button
-                        onClick={handleHotelBooking}
+                        onClick={() => handleHotelBooking(hotel)}
                         className="px-5 py-2.5 rounded-xl font-bold text-white backdrop-blur-xl bg-white/10 border border-white/20 hover:bg-white/20 shadow-lg transition-all hover:shadow-xl hover:scale-105"
                       >
-                        View Deal
+                        Book Now
                       </button>
                     </div>
                   </div>
@@ -351,6 +361,17 @@ export default function TravelPage() {
             </div>
           )}
         </>
+      )}
+      
+      {/* Hotel Booking Modal */}
+      {showHotelBooking && selectedHotel && (
+        <HotelBooking
+          hotel={selectedHotel}
+          onClose={() => {
+            setShowHotelBooking(false);
+            setSelectedHotel(null);
+          }}
+        />
       )}
     </div>
   );
