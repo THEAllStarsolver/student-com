@@ -35,57 +35,57 @@ function CompanionContent() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
-      <h1 className="text-4xl font-bold mb-2">Your Companion 🤝</h1>
-      <p className="text-gray-300 mb-8">Mental wellness and AI assistance</p>
+      <h1 className="text-4xl font-bold mb-2 text-white">Your Companion</h1>
+      <p className="text-slate-400 mb-8">Mental wellness and AI assistance</p>
 
       <div className="flex flex-wrap gap-4 mb-8">
         <button
           onClick={() => setActiveTab('questionnaire')}
           className={`
-            px-6 py-3 rounded-xl transition-all
+            px-6 py-3 rounded-xl transition-all font-medium
             ${activeTab === 'questionnaire'
-              ? 'bg-gradient-to-r from-neon-purple to-neon-pink text-white shadow-lg'
-              : 'bg-white/10 text-gray-300 hover:bg-white/20'
+              ? 'bg-indigo-500/30 text-indigo-300 border border-indigo-500/50'
+              : 'bg-indigo-500/10 text-slate-400 hover:bg-indigo-500/20 hover:text-indigo-400'
             }
           `}
         >
-          🧠 Mood Check
+          Mood Check
         </button>
         <button
           onClick={() => setActiveTab('chatbot')}
           className={`
-            px-6 py-3 rounded-xl transition-all
+            px-6 py-3 rounded-xl transition-all font-medium
             ${activeTab === 'chatbot'
-              ? 'bg-gradient-to-r from-neon-purple to-neon-pink text-white shadow-lg'
-              : 'bg-white/10 text-gray-300 hover:bg-white/20'
+              ? 'bg-indigo-500/30 text-indigo-300 border border-indigo-500/50'
+              : 'bg-indigo-500/10 text-slate-400 hover:bg-indigo-500/20 hover:text-indigo-400'
             }
           `}
         >
-          💬 AI Chat
+          AI Chat
         </button>
         <button
           onClick={() => setActiveTab('youtube')}
           className={`
-            px-6 py-3 rounded-xl transition-all
+            px-6 py-3 rounded-xl transition-all font-medium
             ${activeTab === 'youtube'
-              ? 'bg-gradient-to-r from-neon-purple to-neon-pink text-white shadow-lg'
-              : 'bg-white/10 text-gray-300 hover:bg-white/20'
+              ? 'bg-indigo-500/30 text-indigo-300 border border-indigo-500/50'
+              : 'bg-indigo-500/10 text-slate-400 hover:bg-indigo-500/20 hover:text-indigo-400'
             }
           `}
         >
-          📺 YouTube
+          YouTube
         </button>
         <button
           onClick={() => setActiveTab('focus')}
           className={`
-            px-6 py-3 rounded-xl transition-all
+            px-6 py-3 rounded-xl transition-all font-medium
             ${activeTab === 'focus'
-              ? 'bg-gradient-to-r from-neon-purple to-neon-pink text-white shadow-lg'
-              : 'bg-white/10 text-gray-300 hover:bg-white/20'
+              ? 'bg-indigo-500/30 text-indigo-300 border border-indigo-500/50'
+              : 'bg-indigo-500/10 text-slate-400 hover:bg-indigo-500/20 hover:text-indigo-400'
             }
           `}
         >
-          🎯 Focus Mode
+          Focus Mode
         </button>
       </div>
 

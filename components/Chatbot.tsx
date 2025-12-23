@@ -193,24 +193,24 @@ export default function Chatbot({ initialPrompt }: { initialPrompt?: string }) {
   return (
     <GlassCard className="h-[600px] flex flex-col">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-bold">AI Companion Chat 💬</h2>
+        <h2 className="text-2xl font-bold">AI Companion Chat</h2>
         <div className="flex gap-2">
           <button
             onClick={() => setChatMode('general')}
-            className={`px-3 py-1 rounded-lg text-sm transition-all ${
+            className={`px-3 py-1 rounded-lg text-sm transition-all font-medium ${
               chatMode === 'general'
-                ? 'bg-gradient-to-r from-neon-purple to-neon-pink text-white'
-                : 'bg-white/10 text-slate-300 hover:bg-white/20'
+                ? 'bg-indigo-500/30 text-indigo-300 border border-indigo-500/50'
+                : 'bg-indigo-500/10 text-slate-400 hover:bg-indigo-500/20 hover:text-indigo-400'
             }`}
           >
             General AI
           </button>
           <button
             onClick={() => setChatMode('pdf')}
-            className={`px-3 py-1 rounded-lg text-sm transition-all ${
+            className={`px-3 py-1 rounded-lg text-sm transition-all font-medium ${
               chatMode === 'pdf'
-                ? 'bg-gradient-to-r from-neon-purple to-neon-pink text-white'
-                : 'bg-white/10 text-slate-300 hover:bg-white/20'
+                ? 'bg-indigo-500/30 text-indigo-300 border border-indigo-500/50'
+                : 'bg-indigo-500/10 text-slate-400 hover:bg-indigo-500/20 hover:text-indigo-400'
             }`}
           >
             Ask from PDF
