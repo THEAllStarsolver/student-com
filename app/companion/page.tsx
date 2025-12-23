@@ -4,7 +4,7 @@ import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import MoodQuestionnaire from '@/components/MoodQuestionnaire';
-import Chatbot from '@/components/Chatbot';
+import ChatbotNew from '@/components/ChatbotNew';
 import YouTubePlayer from '@/components/YouTubePlayer';
 import FocusMode from '@/components/FocusMode';
 
@@ -90,7 +90,7 @@ function CompanionContent() {
       </div>
 
       {activeTab === 'questionnaire' && <MoodQuestionnaire />}
-      {activeTab === 'chatbot' && <Chatbot initialPrompt={chatPrompt} />}
+      {activeTab === 'chatbot' && <ChatbotNew initialPrompt={chatPrompt} />}
       {activeTab === 'youtube' && <YouTubePlayer />}
       {activeTab === 'focus' && <FocusMode />}
     </div>
