@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { collection, addDoc, getDocs, updateDoc, deleteDoc, doc, query, where, orderBy } from 'firebase/firestore';
+import { collection, addDoc, getDocs, updateDoc, deleteDoc, doc, query, where } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import GlassCard from '@/components/ui/GlassCard';
 import PrimaryButton from '@/components/ui/PrimaryButton';
@@ -52,14 +52,17 @@ export default function TodoPage() {
       
       const todosQuery = query(
         collection(db, 'todos'),
-        where('uid', '==', user.uid),
-        orderBy('dueDate', 'asc')
+        where('uid', '==', user.uid)
       );
       const snapshot = await getDocs(todosQuery);
       const todosData = snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
       })) as Todo[];
+      
+      // Sort by dueDate on client side to avoid composite index requirement
+      todosData.sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime());
+      
       setTodos(todosData);
     } catch (error: any) {
       const errorMsg = error.message || 'Error fetching todos';
