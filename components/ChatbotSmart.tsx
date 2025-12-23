@@ -3,10 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Loader, Plane } from 'lucide-react';
-import { searchFlights } from '@/lib/flights';
-import { searchYouTube } from '@/lib/youtube';
-import MarkdownRenderer from './MarkdownRenderer';
+import { Send, Loader, Plane, Zap } from 'lucide-react';
 
 interface Message {
   id: string;
@@ -16,7 +13,7 @@ interface Message {
   data?: any;
 }
 
-export default function ChatbotNew({ initialPrompt }: { initialPrompt?: string }) {
+export default function ChatbotSmart({ initialPrompt }: { initialPrompt?: string }) {
   const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState(initialPrompt || '');
@@ -31,39 +28,6 @@ export default function ChatbotNew({ initialPrompt }: { initialPrompt?: string }
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
-
-  // Detect flight query and extract details
-  const detectFlightQuery = (text: string): { from?: string; to?: string; date?: string } | null => {
-    const flightPatterns = [
-      /(?:flight|flights|book).*?from\s+(\w+).*?to\s+(\w+).*?(?:on|for)\s+(\w+|\d{4}-\d{2}-\d{2})/i,
-      /(?:show|find|search).*?flights.*?from\s+(\w+).*?to\s+(\w+).*?(?:on|for)\s+(\w+|\d{4}-\d{2}-\d{2})/i,
-      /flights?\s+from\s+(\w+)\s+to\s+(\w+)\s+(\w+|\d{4}-\d{2}-\d{2})/i,
-    ];
-
-    for (const pattern of flightPatterns) {
-      const match = text.match(pattern);
-      if (match) {
-        return { from: match[1], to: match[2], date: match[3] };
-      }
-    }
-    return null;
-  };
-
-  // Detect YouTube query
-  const detectYoutubeQuery = (text: string): string | null => {
-    const youtubePatterns = [
-      /(?:search|find|show|watch).*?(?:videos?|youtube).*?(?:about|on|for)\s+(.+)/i,
-      /(?:youtube|video).*?(?:about|on|for)\s+(.+)/i,
-    ];
-
-    for (const pattern of youtubePatterns) {
-      const match = text.match(pattern);
-      if (match) {
-        return match[1];
-      }
-    }
-    return null;
-  };
 
   const handleSend = async () => {
     if (!input.trim() || loading) return;
@@ -87,67 +51,12 @@ export default function ChatbotNew({ initialPrompt }: { initialPrompt?: string }
       role: 'assistant',
       content: '',
       timestamp: new Date(),
-      data: {},
     };
 
     setMessages((prev) => [...prev, assistantMessage]);
 
     try {
-      // Check for flight query
-      const flightQuery = detectFlightQuery(userInput);
-      if (flightQuery && flightQuery.from && flightQuery.to) {
-        let actualDate = flightQuery.date || 'today';
-        if (actualDate.toLowerCase() === 'tomorrow') {
-          const tomorrow = new Date();
-          tomorrow.setDate(tomorrow.getDate() + 1);
-          actualDate = tomorrow.toISOString().split('T')[0];
-        } else if (actualDate.toLowerCase() === 'today') {
-          actualDate = new Date().toISOString().split('T')[0];
-        }
-
-        const flights = await searchFlights(flightQuery.from, flightQuery.to, actualDate);
-        
-        setMessages((prev) =>
-          prev.map((msg) =>
-            msg.id === assistantId
-              ? {
-                  ...msg,
-                  content: flights.length > 0
-                    ? `✈️ Found ${flights.length} flights from ${flightQuery.from} to ${flightQuery.to} on ${flightQuery.date}:`
-                    : `No flights found from ${flightQuery.from} to ${flightQuery.to}. Try different dates or cities.`,
-                  data: { flights },
-                }
-              : msg
-          )
-        );
-        setLoading(false);
-        return;
-      }
-
-      // Check for YouTube query
-      const youtubeQuery = detectYoutubeQuery(userInput);
-      if (youtubeQuery) {
-        const videos = await searchYouTube(youtubeQuery, 5);
-        
-        setMessages((prev) =>
-          prev.map((msg) =>
-            msg.id === assistantId
-              ? {
-                  ...msg,
-                  content: videos.length > 0
-                    ? `🎥 Found ${videos.length} videos about "${youtubeQuery}":`
-                    : `No videos found for "${youtubeQuery}". Try a different search.`,
-                  data: { videos },
-                }
-              : msg
-          )
-        );
-        setLoading(false);
-        return;
-      }
-
-      // Default: use LLM
-      const response = await fetch('/api/llm', {
+      const response = await fetch('/api/llm-smart', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt: userInput }),
@@ -201,27 +110,53 @@ export default function ChatbotNew({ initialPrompt }: { initialPrompt?: string }
     }
   };
 
+  const quickQuestions = [
+    'Show flights from Lucknow to Mumbai tomorrow',
+    'Find videos about studying',
+    'What features do you have?',
+    'Help me with internship search',
+  ];
+
   return (
     <div className="flex flex-col h-full bg-[#050508] rounded-xl border border-indigo-500/20 overflow-hidden">
       {/* Header */}
       <div className="border-b border-indigo-500/20 bg-indigo-500/5 px-6 py-4">
-        <h2 className="text-xl font-bold text-white">AI Chat Assistant</h2>
-        <p className="text-sm text-indigo-400/70 mt-1">Powered by Groq • Available 24/7</p>
+        <div className="flex items-center gap-2 mb-1">
+          <h2 className="text-xl font-bold text-white">AI Smart Assistant</h2>
+          <Zap className="w-5 h-5 text-yellow-400" />
+        </div>
+        <p className="text-sm text-indigo-400/70">Powered by Groq • Can access app features</p>
       </div>
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-6 py-6 space-y-4 custom-scrollbar">
         {messages.length === 0 && !loading && (
-          <div className="flex items-center justify-center h-full text-center">
+          <div className="flex flex-col items-center justify-center h-full text-center gap-6">
             <div>
-              <h3 className="text-lg font-semibold text-white mb-2">Start a Conversation</h3>
-              <p className="text-slate-400">Ask me about careers, skills, exams, or anything else!</p>
+              <h3 className="text-lg font-semibold text-white mb-2">Hey! 👋</h3>
+              <p className="text-slate-400 mb-6">I can help you with flights, hotels, internships, and more!</p>
+              
+              <div className="space-y-2">
+                <p className="text-sm text-indigo-400/70 font-semibold mb-3">Try asking me:</p>
+                {quickQuestions.map((q, i) => (
+                  <button
+                    key={i}
+                    onClick={() => {
+                      setInput(q);
+                      setTimeout(() => setInput(q), 0);
+                    }}
+                    className="block w-full text-left px-3 py-2 text-sm bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 rounded-lg text-indigo-300 transition-colors"
+                  >
+                    {q}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         )}
 
         <AnimatePresence>
-          {messages.map((message, index) => (
+          {messages.map((message) => (
             <motion.div
               key={message.id}
               initial={{ opacity: 0, y: 10 }}
@@ -236,50 +171,27 @@ export default function ChatbotNew({ initialPrompt }: { initialPrompt?: string }
                     : 'bg-slate-800/50 text-slate-100 border border-slate-700/30'
                 }`}
               >
-                <div className="text-sm leading-relaxed break-words">
-                  {message.role === 'assistant' ? (
-                    <MarkdownRenderer content={message.content} className="text-sm" />
-                  ) : (
-                    message.content
-                  )}
+                <div className="text-sm leading-relaxed break-words whitespace-pre-wrap">
+                  {message.content}
                 </div>
 
                 {/* Flight Results */}
                 {message.data?.flights && Array.isArray(message.data.flights) && (
-                  <div className="mt-4 space-y-3">
-                    {message.data.flights.slice(0, 5).map((flight: any, idx: number) => (
+                  <div className="mt-4 space-y-2">
+                    {message.data.flights.map((flight: any, idx: number) => (
                       <div
                         key={idx}
                         className="bg-slate-900/50 p-3 rounded-lg border border-slate-700/30"
                       >
                         <div className="flex items-center gap-2 mb-1">
                           <Plane className="w-4 h-4 text-indigo-400" />
-                          <span className="font-semibold text-indigo-300 text-xs">{flight.airline}</span>
+                          <span className="font-semibold text-indigo-300">{flight.airline}</span>
                         </div>
                         <p className="text-xs text-slate-300">
                           {flight.departure} → {flight.arrival}
                         </p>
-                        <p className="text-xs text-slate-400">Duration: {flight.duration}</p>
-                        <p className="text-xs text-indigo-400 font-semibold mt-1">₹{flight.price}</p>
+                        <p className="text-xs text-slate-400">₹{flight.price}</p>
                       </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* YouTube Results */}
-                {message.data?.videos && Array.isArray(message.data.videos) && (
-                  <div className="mt-4 space-y-2">
-                    {message.data.videos.slice(0, 5).map((video: any, idx: number) => (
-                      <a
-                        key={idx}
-                        href={video.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="block p-2 bg-slate-900/50 rounded-lg border border-slate-700/30 hover:border-indigo-500/50 transition-colors"
-                      >
-                        <p className="text-xs font-semibold text-indigo-400 line-clamp-2">{video.title}</p>
-                        <p className="text-xs text-slate-400 mt-1">{video.channel}</p>
-                      </a>
                     ))}
                   </div>
                 )}
@@ -322,7 +234,7 @@ export default function ChatbotNew({ initialPrompt }: { initialPrompt?: string }
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="Type your message... (Shift+Enter for new line)"
+            placeholder="Ask me anything... (flights, internships, etc)"
             rows={2}
             className="flex-1 bg-slate-800 border border-indigo-500/30 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 resize-none"
           />

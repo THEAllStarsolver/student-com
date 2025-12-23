@@ -4,6 +4,7 @@ import '@/styles/globals.css';
 import { AuthProvider } from '@/context/AuthContext';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import { AnimationProvider } from '@/context/AnimationContext';
+import { FocusProvider } from '@/context/FocusContext';
 import ModernShell from '@/components/ModernShell';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -24,9 +25,11 @@ export default function RootLayout({
         <AuthProvider>
           <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} forcedTheme="dark">
             <AnimationProvider>
-              <ModernShell>
-                {children}
-              </ModernShell>
+              <FocusProvider>
+                <ModernShell>
+                  {children}
+                </ModernShell>
+              </FocusProvider>
             </AnimationProvider>
           </ThemeProvider>
         </AuthProvider>

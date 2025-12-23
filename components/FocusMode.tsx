@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import { useFocus } from '@/context/FocusContext';
 import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import GlassCard from './ui/GlassCard';
@@ -20,6 +21,7 @@ interface FocusSession {
 
 export default function FocusMode({ onFocusEnd }: { onFocusEnd?: () => void }) {
   const { user } = useAuth();
+  const { setIsFocusActive } = useFocus();
   const [focusSession, setFocusSession] = useState<FocusSession | null>(null);
   const [customDuration, setCustomDuration] = useState(25);
   const [timeRemaining, setTimeRemaining] = useState(0);
@@ -130,6 +132,7 @@ export default function FocusMode({ onFocusEnd }: { onFocusEnd?: () => void }) {
       setFocusSession(sessionData);
       setTimeRemaining(duration * 60);
       setShowExitWarning(false);
+      setIsFocusActive(true);
     } catch (error) {
       console.error('Error starting focus session:', error);
     }
@@ -144,6 +147,7 @@ export default function FocusMode({ onFocusEnd }: { onFocusEnd?: () => void }) {
       setTimeRemaining(0);
       exitFullscreen();
       setShowExitWarning(false);
+      setIsFocusActive(false);
       if (onFocusEnd) onFocusEnd();
     } catch (error) {
       console.error('Error ending focus session:', error);
@@ -374,59 +378,6 @@ export default function FocusMode({ onFocusEnd }: { onFocusEnd?: () => void }) {
             min="1"
             max="180"
             className="px-4 py-3 rounded-xl bg-slate-800 border border-indigo-500/30 focus:border-indigo-500 focus:outline-none text-white w-24"
-          />
-          <span className="flex items-center text-slate-300">minutes</span>
-          <PrimaryButton
-            onClick={() => startFocusSession(customDuration)}
-            className="ml-auto"
-          >
-            Start Custom Session
-          </PrimaryButton>
-        </div>
-      </div>
-    </GlassCard>
-  );
-}
-          >
-            💬 AI Chat
-          </button>
-        </div>
-
-        {activeTab === 'youtube' ? <YouTubePlayer /> : <Chatbot />}
-      </div>
-    );
-  }
-
-  return (
-    <GlassCard>
-      <h2 className="text-2xl font-bold mb-6 text-white">Focus Mode 🎯</h2>
-      
-      <div className="mb-6">
-        <p className="text-slate-300 mb-4">
-          Start a focus session to limit distractions. Only YouTube and AI Chat will be available.
-        </p>
-        
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-          {pomodoroPresets.map((preset) => (
-            <button
-              key={preset.name}
-              onClick={() => startFocusSession(preset.duration)}
-              className="p-4 bg-white/10 border border-white/20 rounded-xl hover:bg-white/20 transition-all text-center"
-            >
-              <div className="text-lg font-semibold text-white">{preset.duration}m</div>
-              <div className="text-sm text-slate-400">{preset.name}</div>
-            </button>
-          ))}
-        </div>
-
-        <div className="flex gap-2">
-          <input
-            type="number"
-            value={customDuration}
-            onChange={(e) => setCustomDuration(parseInt(e.target.value) || 25)}
-            min="1"
-            max="180"
-            className="px-4 py-3 rounded-xl bg-white/10 border border-white/20 focus:border-neon-purple focus:outline-none text-white w-24"
           />
           <span className="flex items-center text-slate-300">minutes</span>
           <PrimaryButton
